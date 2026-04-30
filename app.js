@@ -1,23 +1,24 @@
 const STORAGE_KEY = "puppy-gallery-photos";
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const SAMPLE_PREFIX = "sample-angyoon-";
 
 const samplePhotos = [
   {
-    id: "sample-park",
-    imageUrl: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1200&q=80",
-    caption: "Sunny walk, maximum tail wag",
+    id: `${SAMPLE_PREFIX}blanket`,
+    imageUrl: "angyoon_happy.jpg",
+    caption: "Cozy blanket peek",
     createdAt: "2026-04-28T09:30:00.000Z"
   },
   {
-    id: "sample-nap",
-    imageUrl: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=1200&q=80",
-    caption: "Sleepy day after the park",
+    id: `${SAMPLE_PREFIX}bed`,
+    imageUrl: "angyoon_sleeping.jpg",
+    caption: "Queen Angyoon in her bed",
     createdAt: "2026-04-27T13:15:00.000Z"
   },
   {
-    id: "sample-smile",
-    imageUrl: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1200&q=80",
-    caption: "Tiny grin, big mood",
+    id: `${SAMPLE_PREFIX}toy`,
+    imageUrl: "angyoon_running.jpg",
+    caption: "Running with a favorite toy",
     createdAt: "2026-04-26T16:45:00.000Z"
   }
 ];
@@ -47,7 +48,20 @@ function loadPhotos() {
 
   try {
     const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : [...samplePhotos];
+    if (!Array.isArray(parsed)) {
+      return [...samplePhotos];
+    }
+
+    const uploadedPhotos = parsed.filter((photo) => !String(photo.id).startsWith("sample-"));
+    const hasCurrentSamples = parsed.some((photo) => String(photo.id).startsWith(SAMPLE_PREFIX));
+
+    if (hasCurrentSamples) {
+      return parsed;
+    }
+
+    const migratedPhotos = [...samplePhotos, ...uploadedPhotos];
+    savePhotos(migratedPhotos);
+    return migratedPhotos;
   } catch {
     return [...samplePhotos];
   }
